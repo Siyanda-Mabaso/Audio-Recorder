@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import RecordingItem from "../components/RecordingItem";
 import { useFocusEffect, router } from "expo-router";
 import { getRecordings } from "../services/recordingService";
 import { Recording } from "../types/Recording";
@@ -76,24 +77,9 @@ export default function HomeScreen() {
             </Text>
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={styles.recordingCard}>
-            <View style={styles.audioIcon}>
-              <Text style={styles.audioIconText}>♫</Text>
-            </View>
-
-            <View style={styles.recordingInfo}>
-              <Text style={styles.recordingName}>{item.name}</Text>
-              <Text style={styles.recordingDate}>
-                {formatDate(item.createdAt)}
-              </Text>
-            </View>
-
-            <Text style={styles.duration}>
-              {formatDuration(item.duration)}
-            </Text>
-          </View>
-        )}
+renderItem={({ item }) => (
+  <RecordingItem recording={item} />
+)}
       />
     </View>
   );
