@@ -78,7 +78,10 @@ export default function HomeScreen() {
           </View>
         }
 renderItem={({ item }) => (
-  <RecordingItem recording={item} />
+  <RecordingItem
+    recording={item}
+    onUpdate={loadRecordings}
+  />
 )}
       />
     </View>
