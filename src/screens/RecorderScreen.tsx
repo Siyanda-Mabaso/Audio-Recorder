@@ -24,7 +24,7 @@ export default function RecorderScreen() {
   });
 
   const recorderState = useAudioRecorderState(recorder);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const formatTime = (milliseconds: number) => {
     const totalSeconds = Math.floor(milliseconds / 1000);
@@ -38,6 +38,8 @@ export default function RecorderScreen() {
 
   const startRecording = async () => {
     try {
+      setIsProcessing(true);
+
       const permission =
         await AudioModule.requestRecordingPermissionsAsync();
 
@@ -58,13 +60,25 @@ export default function RecorderScreen() {
       recorder.record();
     } catch (error) {
       console.error("Recording error:", error);
+
       Alert.alert("Error", "Could not start recording.");
+
+      try {
+        await setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+        });
+      } catch (modeError) {
+        console.error("Audio mode error:", modeError);
+      }
+    } finally {
+      setIsProcessing(false);
     }
   };
 
   const stopRecording = async () => {
     try {
-      setIsSaving(true);
+      setIsProcessing(true);
 
       const duration = recorderState.durationMillis;
 
@@ -95,7 +109,16 @@ export default function RecorderScreen() {
       console.error("Saving error:", error);
       Alert.alert("Error", "Could not save your recording.");
     } finally {
-      setIsSaving(false);
+      try {
+        await setAudioModeAsync({
+          allowsRecording: false,
+          playsInSilentMode: true,
+        });
+      } catch (error) {
+        console.error("Could not restore audio mode:", error);
+      }
+
+      setIsProcessing(false);
     }
   };
 
@@ -128,14 +151,14 @@ export default function RecorderScreen() {
               ? stopRecording
               : startRecording
           }
-          disabled={isSaving}
+          disabled={isProcessing}
         >
           <View style={styles.recordButtonInner} />
         </TouchableOpacity>
 
         <Text style={styles.buttonText}>
-          {isSaving
-            ? "Saving..."
+          {isProcessing
+            ? "Please wait..."
             : recorderState.isRecording
             ? "Stop Recording"
             : "Start Recording"}
